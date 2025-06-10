@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "719266321350",
+    "firebase_url": "https://irrigationsystem-cfcab-default-rtdb.firebaseio.com",
+    "project_id": "irrigationsystem-cfcab",
+    "storage_bucket": "irrigationsystem-cfcab.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:719266321350:android:68485f1cc1fc03ebc298c7",
+        "android_client_info": {
+          "package_name": "com.example.irrigation_system"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDkBiDQCNoA7ija-B8wgOGRTkdqA9TxyIQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

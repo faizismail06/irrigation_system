@@ -1,0 +1,43 @@
+name: irrigation_system
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.7.0-85.0.dev
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # Firebase
+  firebase_core: 3.13.1
+  firebase_auth: 5.5.4
+  firebase_database: 11.3.6
+  
+  # State management
+  provider: ^6.0.5
+  
+  # UI
+  google_fonts: ^5.1.0
+  flutter_svg: ^2.0.7
+  fl_chart: ^0.63.0
+  lottie: ^2.6.0
+  flutter_animate: ^4.2.0
+  
+  # Utils
+  intl: ^0.18.1
+  shimmer: ^3.0.0
+  
+  # Icons
+  cupertino_icons: ^1.0.5
+  font_awesome_flutter: ^10.5.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.2
+  flutter_launcher_icons: ^0.13.1
+
+
+flutter:
+  uses-material-design: true
