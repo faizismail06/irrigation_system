@@ -51,7 +51,7 @@ class PumpControlCard extends StatelessWidget {
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
-        padding: EdgeInsets.all(isSmallScreen ? 12.0 : 16.0),
+        padding: EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -59,7 +59,7 @@ class PumpControlCard extends StatelessWidget {
             Row(
               children: [
                 Container(
-                  padding: EdgeInsets.all(isSmallScreen ? 6 : 8),
+                  padding: EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: activeColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
@@ -67,7 +67,7 @@ class PumpControlCard extends StatelessWidget {
                   child: Icon(
                     Icons.water,
                     color: activeColor,
-                    size: isSmallScreen ? 14 : 16,
+                    size: 16,
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -82,11 +82,11 @@ class PumpControlCard extends StatelessWidget {
               ],
             ),
 
-            SizedBox(height: isSmallScreen ? 12 : 16),
+            SizedBox(height: 16),
 
             // Pump status indicator
             Container(
-              padding: EdgeInsets.all(isSmallScreen ? 12 : 16),
+              padding: EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: activeColor.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(16),

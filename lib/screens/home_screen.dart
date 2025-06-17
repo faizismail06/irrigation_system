@@ -139,45 +139,41 @@ class _HomeScreenState extends State<HomeScreen>
 
             const SizedBox(height: 16),
 
-            // Main controls
+            // Moisture status visualization - moved to the top
+            MoistureStatusCard(
+              moistureValue: model.moistureValue,
+              soilStatus: model.soilStatus,
+            ),
+
+            const SizedBox(height: 16),
+
+            // Mode switch and pump controls side by side
             Row(
               children: [
-                // Moisture status visualization
+                // Mode switch card
                 Expanded(
                   flex: 1,
-                  child: MoistureStatusCard(
-                    moistureValue: model.moistureValue,
-                    soilStatus: model.soilStatus,
+                  child: ModeSwitchCard(
+                    autoMode: model.autoMode,
+                    onToggle: model.toggleAutoMode,
                   ),
                 ),
 
                 const SizedBox(width: 16),
 
-                // Mode switch and pump controls
+                // Pump controls card
                 Expanded(
                   flex: 1,
-                  child: Column(
-                    children: [
-                      ModeSwitchCard(
-                        autoMode: model.autoMode,
-                        onToggle: model.toggleAutoMode,
-                      ),
-                      const SizedBox(height: 16),
-                      // Widget usage dengan parameter yang lengkap
-                      PumpControlCard(
-                        pumpStatus: model.pumpStatus,
-                        autoMode: model.autoMode,
-                        pumpTimer: model.localTimerValue,
-                        isTimerActive: model.isTimerActive,
-                        onToggle: model.togglePump,
-                        onStartTimer: model.startPumpWithTimer,
-                        onCancelTimer: model.cancelPumpTimer,
-                        onPumpCommand:
-                            model.sendPumpCommand, // Parameter yang sudah ada
-                        onResetTimer: model
-                            .resetPumpTimer, // Parameter baru yang diperlukan
-                      ),
-                    ],
+                  child: PumpControlCard(
+                    pumpStatus: model.pumpStatus,
+                    autoMode: model.autoMode,
+                    pumpTimer: model.localTimerValue,
+                    isTimerActive: model.isTimerActive,
+                    onToggle: model.togglePump,
+                    onStartTimer: model.startPumpWithTimer,
+                    onCancelTimer: model.cancelPumpTimer,
+                    onPumpCommand: model.sendPumpCommand,
+                    onResetTimer: model.resetPumpTimer,
                   ),
                 ),
               ],
