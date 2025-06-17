@@ -9,8 +9,8 @@ class PumpControlCard extends StatelessWidget {
   final VoidCallback onToggle;
   final Function(int) onStartTimer;
   final VoidCallback onCancelTimer;
-  final Function(bool) onPumpCommand; // New callback for pump command
-  final VoidCallback onResetTimer; // New callback to reset timer
+  final Function(bool) onPumpCommand;
+  final VoidCallback onResetTimer;
   final int pumpTimer;
   final bool isTimerActive;
 
@@ -21,14 +21,20 @@ class PumpControlCard extends StatelessWidget {
     required this.onToggle,
     required this.onStartTimer,
     required this.onCancelTimer,
-    required this.onPumpCommand, // New required parameter
-    required this.onResetTimer, // New required parameter
+    required this.onPumpCommand,
+    required this.onResetTimer,
     this.pumpTimer = 0,
     this.isTimerActive = false,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isSmallScreen = screenWidth < 600;
+    final isVerySmallScreen = screenWidth < 400;
+    final isShortScreen = screenHeight < 700;
+
     // Check if timer has reached 00:00 but pump is still showing as active
     final shouldShowInactive = isTimerActive && pumpTimer <= 0;
     final displayPumpStatus = shouldShowInactive ? false : pumpStatus;
@@ -37,59 +43,98 @@ class PumpControlCard extends StatelessWidget {
     if (shouldShowInactive && pumpStatus) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         onPumpCommand(false);
-        onResetTimer(); // Reset timer to 0
+        onResetTimer();
       });
     }
 
     final activeColor = displayPumpStatus
         ? AppTheme.activePumpColor
         : AppTheme.inactivePumpColor;
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isSmallScreen = screenWidth < 600;
+
+    // Responsive measurements
+    final cardPadding = isVerySmallScreen
+        ? 10.0
+        : isSmallScreen
+            ? 12.0
+            : 16.0;
+    final iconSize = isVerySmallScreen
+        ? 12.0
+        : isSmallScreen
+            ? 14.0
+            : 16.0;
+    final iconPadding = isVerySmallScreen ? 6.0 : 8.0;
+    final sectionSpacing = isVerySmallScreen
+        ? 8.0
+        : isSmallScreen
+            ? 12.0
+            : 16.0;
+    final innerPadding = isVerySmallScreen
+        ? 10.0
+        : isSmallScreen
+            ? 12.0
+            : 16.0;
+    final pumpIconSize = isVerySmallScreen
+        ? 16.0
+        : isSmallScreen
+            ? 20.0
+            : 24.0;
+    final pumpIconPadding = isVerySmallScreen
+        ? 4.0
+        : isSmallScreen
+            ? 6.0
+            : 8.0;
 
     return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: isSmallScreen ? 2 : 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(isSmallScreen ? 12 : 16),
+      ),
       child: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(cardPadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             // Header
             Row(
               children: [
                 Container(
-                  padding: EdgeInsets.all(8),
+                  padding: EdgeInsets.all(iconPadding),
                   decoration: BoxDecoration(
                     color: activeColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(isSmallScreen ? 6 : 8),
                   ),
                   child: Icon(
                     Icons.water,
                     color: activeColor,
-                    size: 16,
+                    size: iconSize,
                   ),
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: isVerySmallScreen ? 6 : 8),
                 Expanded(
                   child: Text(
                     'Kontrol Pompa',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontSize: isSmallScreen ? 14 : 16,
+                          fontSize: isVerySmallScreen
+                              ? 12
+                              : isSmallScreen
+                                  ? 14
+                                  : 16,
+                          fontWeight: FontWeight.w600,
                         ),
                   ),
                 ),
               ],
             ),
 
-            SizedBox(height: 16),
+            SizedBox(height: sectionSpacing),
 
             // Pump status indicator
             Container(
-              padding: EdgeInsets.all(16),
+              padding: EdgeInsets.all(innerPadding),
               decoration: BoxDecoration(
                 color: activeColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(isSmallScreen ? 12 : 16),
                 border: Border.all(
                   color: activeColor.withOpacity(0.3),
                   width: 1,
@@ -100,7 +145,7 @@ class PumpControlCard extends StatelessWidget {
                   // Animated pump icon
                   if (displayPumpStatus)
                     Container(
-                      padding: EdgeInsets.all(isSmallScreen ? 6 : 8),
+                      padding: EdgeInsets.all(pumpIconPadding),
                       decoration: BoxDecoration(
                         color: AppTheme.activePumpColor,
                         shape: BoxShape.circle,
@@ -108,7 +153,7 @@ class PumpControlCard extends StatelessWidget {
                       child: Icon(
                         Icons.water,
                         color: Colors.white,
-                        size: isSmallScreen ? 20 : 24,
+                        size: pumpIconSize,
                       ),
                     )
                         .animate(
@@ -129,7 +174,7 @@ class PumpControlCard extends StatelessWidget {
                         )
                   else
                     Container(
-                      padding: EdgeInsets.all(isSmallScreen ? 6 : 8),
+                      padding: EdgeInsets.all(pumpIconPadding),
                       decoration: BoxDecoration(
                         color: AppTheme.inactivePumpColor.withOpacity(0.8),
                         shape: BoxShape.circle,
@@ -137,16 +182,22 @@ class PumpControlCard extends StatelessWidget {
                       child: Icon(
                         Icons.water_drop,
                         color: Colors.white,
-                        size: isSmallScreen ? 20 : 24,
+                        size: pumpIconSize,
                       ),
                     ),
 
-                  SizedBox(width: isSmallScreen ? 12 : 16),
+                  SizedBox(
+                      width: isVerySmallScreen
+                          ? 8
+                          : isSmallScreen
+                              ? 12
+                              : 16),
 
                   // Status text
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
                           _getPumpStatusText(
@@ -154,44 +205,80 @@ class PumpControlCard extends StatelessWidget {
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: activeColor,
-                            fontSize: isSmallScreen ? 14 : 16,
+                            fontSize: isVerySmallScreen
+                                ? 11
+                                : isSmallScreen
+                                    ? 13
+                                    : 16,
                           ),
                         ),
-                        SizedBox(height: isSmallScreen ? 2 : 4),
+                        SizedBox(
+                            height: isVerySmallScreen
+                                ? 1
+                                : isSmallScreen
+                                    ? 2
+                                    : 4),
                         Text(
                           _getPumpDescriptionText(
                               displayPumpStatus, isTimerActive, pumpTimer),
                           style: TextStyle(
                             color: Colors.grey,
-                            fontSize: isSmallScreen ? 11 : 12,
+                            fontSize: isVerySmallScreen
+                                ? 9
+                                : isSmallScreen
+                                    ? 10
+                                    : 12,
+                            height: 1.2,
                           ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
                         if (isTimerActive && pumpTimer > 0) ...[
-                          SizedBox(height: isSmallScreen ? 6 : 8),
+                          SizedBox(
+                              height: isVerySmallScreen
+                                  ? 4
+                                  : isSmallScreen
+                                      ? 6
+                                      : 8),
                           Text(
                             'Pompa akan otomatis mati dalam:',
                             style: TextStyle(
                               color: Colors.grey.shade400,
-                              fontSize: isSmallScreen ? 10 : 11,
+                              fontSize: isVerySmallScreen
+                                  ? 8
+                                  : isSmallScreen
+                                      ? 9
+                                      : 11,
                               fontStyle: FontStyle.italic,
                             ),
                           ),
-                          SizedBox(height: isSmallScreen ? 2 : 4),
+                          SizedBox(
+                              height: isVerySmallScreen
+                                  ? 1
+                                  : isSmallScreen
+                                      ? 2
+                                      : 4),
                           CountdownTimerWidget(
                             seconds: pumpTimer,
                             isActive: displayPumpStatus,
                             onCancel: onCancelTimer,
                           ),
                         ] else if (isTimerActive && pumpTimer <= 0) ...[
-                          SizedBox(height: isSmallScreen ? 6 : 8),
+                          SizedBox(
+                              height: isVerySmallScreen
+                                  ? 4
+                                  : isSmallScreen
+                                      ? 6
+                                      : 8),
                           Container(
                             padding: EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
+                              horizontal: isVerySmallScreen ? 8 : 12,
+                              vertical: isVerySmallScreen ? 4 : 6,
                             ),
                             decoration: BoxDecoration(
                               color: Colors.orange.shade100,
-                              borderRadius: BorderRadius.circular(6),
+                              borderRadius:
+                                  BorderRadius.circular(isSmallScreen ? 4 : 6),
                               border: Border.all(
                                 color: Colors.orange.shade300,
                                 width: 1,
@@ -202,15 +289,23 @@ class PumpControlCard extends StatelessWidget {
                               children: [
                                 Icon(
                                   Icons.schedule,
-                                  size: isSmallScreen ? 14 : 16,
+                                  size: isVerySmallScreen
+                                      ? 12
+                                      : isSmallScreen
+                                          ? 14
+                                          : 16,
                                   color: Colors.orange.shade700,
                                 ),
-                                const SizedBox(width: 6),
+                                SizedBox(width: isVerySmallScreen ? 3 : 6),
                                 Text(
                                   'Pompa dimatikan',
                                   style: TextStyle(
                                     color: Colors.orange.shade700,
-                                    fontSize: isSmallScreen ? 10 : 11,
+                                    fontSize: isVerySmallScreen
+                                        ? 8
+                                        : isSmallScreen
+                                            ? 9
+                                            : 11,
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
@@ -225,19 +320,23 @@ class PumpControlCard extends StatelessWidget {
               ),
             ),
 
-            SizedBox(height: isSmallScreen ? 12 : 16),
+            SizedBox(height: sectionSpacing),
 
             // Control buttons
             if (autoMode)
               // Auto mode indicator
               Container(
                 padding: EdgeInsets.symmetric(
-                  vertical: isSmallScreen ? 10 : 12,
-                  horizontal: 16,
+                  vertical: isVerySmallScreen
+                      ? 8
+                      : isSmallScreen
+                          ? 10
+                          : 12,
+                  horizontal: isVerySmallScreen ? 12 : 16,
                 ),
                 decoration: BoxDecoration(
                   color: Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(isSmallScreen ? 6 : 8),
                   border: Border.all(color: Colors.grey.shade300),
                 ),
                 child: Row(
@@ -246,15 +345,23 @@ class PumpControlCard extends StatelessWidget {
                     Icon(
                       Icons.auto_mode,
                       color: Colors.grey.shade600,
-                      size: isSmallScreen ? 16 : 18,
+                      size: isVerySmallScreen
+                          ? 14
+                          : isSmallScreen
+                              ? 16
+                              : 18,
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: isVerySmallScreen ? 6 : 8),
                     Text(
                       'Mode Otomatis Aktif',
                       style: TextStyle(
                         color: Colors.grey.shade600,
                         fontWeight: FontWeight.w500,
-                        fontSize: isSmallScreen ? 12 : 14,
+                        fontSize: isVerySmallScreen
+                            ? 10
+                            : isSmallScreen
+                                ? 12
+                                : 14,
                       ),
                     ),
                   ],
@@ -270,21 +377,34 @@ class PumpControlCard extends StatelessWidget {
                     backgroundColor: _getButtonColor(
                         displayPumpStatus, isTimerActive, pumpTimer),
                     padding: EdgeInsets.symmetric(
-                      vertical: isSmallScreen ? 12 : 14,
+                      vertical: isVerySmallScreen
+                          ? 10
+                          : isSmallScreen
+                              ? 12
+                              : 14,
                     ),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius:
+                          BorderRadius.circular(isSmallScreen ? 6 : 8),
                     ),
                   ),
                   icon: Icon(
                     _getButtonIcon(displayPumpStatus, isTimerActive, pumpTimer),
-                    size: isSmallScreen ? 20 : 22,
+                    size: isVerySmallScreen
+                        ? 18
+                        : isSmallScreen
+                            ? 20
+                            : 22,
                   ),
                   label: Text(
                     _getButtonText(displayPumpStatus, isTimerActive, pumpTimer),
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: isSmallScreen ? 14 : 16,
+                      fontSize: isVerySmallScreen
+                          ? 12
+                          : isSmallScreen
+                              ? 14
+                              : 16,
                     ),
                   ),
                 ),
@@ -359,7 +479,10 @@ class PumpControlCard extends StatelessWidget {
 
   void _showTimerSelectionDialog(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
     final isSmallScreen = screenWidth < 600;
+    final isVerySmallScreen = screenWidth < 400;
+    final isShortScreen = screenHeight < 700;
 
     showDialog(
       context: context,
@@ -368,7 +491,11 @@ class PumpControlCard extends StatelessWidget {
           title: Text(
             'Pilih Durasi Timer',
             style: TextStyle(
-              fontSize: isSmallScreen ? 16 : 18,
+              fontSize: isVerySmallScreen
+                  ? 14
+                  : isSmallScreen
+                      ? 16
+                      : 18,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -378,12 +505,17 @@ class PumpControlCard extends StatelessWidget {
               Text(
                 'Pilih berapa lama pompa akan menyala:',
                 style: TextStyle(
-                  fontSize: isSmallScreen ? 12 : 14,
+                  fontSize: isVerySmallScreen
+                      ? 11
+                      : isSmallScreen
+                          ? 12
+                          : 14,
                   color: Colors.grey.shade600,
                 ),
               ),
-              const SizedBox(height: 16),
-              _buildTimerOptions(context, isSmallScreen),
+              SizedBox(height: isVerySmallScreen ? 12 : 16),
+              _buildTimerOptions(
+                  context, isSmallScreen, isVerySmallScreen, isShortScreen),
             ],
           ),
           actions: [
@@ -392,7 +524,11 @@ class PumpControlCard extends StatelessWidget {
               child: Text(
                 'BATAL',
                 style: TextStyle(
-                  fontSize: isSmallScreen ? 12 : 14,
+                  fontSize: isVerySmallScreen
+                      ? 11
+                      : isSmallScreen
+                          ? 12
+                          : 14,
                 ),
               ),
             ),
@@ -402,7 +538,8 @@ class PumpControlCard extends StatelessWidget {
     );
   }
 
-  Widget _buildTimerOptions(BuildContext context, bool isSmallScreen) {
+  Widget _buildTimerOptions(BuildContext context, bool isSmallScreen,
+      bool isVerySmallScreen, bool isShortScreen) {
     final timerOptions = [
       {'label': '1 Menit', 'seconds': 60},
       {'label': '2 Menit', 'seconds': 120},
@@ -414,51 +551,76 @@ class PumpControlCard extends StatelessWidget {
       {'label': '2 Jam', 'seconds': 7200},
     ];
 
-    return Column(
-      children: timerOptions.map((option) {
-        return Container(
-          width: double.infinity,
-          margin: const EdgeInsets.only(bottom: 8),
-          child: ElevatedButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-              // Add delay to ensure smooth activation
-              Future.delayed(const Duration(milliseconds: 100), () {
-                onStartTimer(option['seconds'] as int);
-                onPumpCommand(true); // Send true command when starting timer
-              });
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.activePumpColor,
-              padding: EdgeInsets.symmetric(
-                vertical: isSmallScreen ? 10 : 12,
+    // Adjust number of options based on screen height
+    final maxOptions = isShortScreen ? 6 : 8;
+    final displayOptions = timerOptions.take(maxOptions).toList();
+
+    return SizedBox(
+      height: isShortScreen ? 300 : 400,
+      width: double.maxFinite,
+      child: SingleChildScrollView(
+        child: Column(
+          children: displayOptions.map((option) {
+            return Container(
+              width: double.infinity,
+              margin: EdgeInsets.only(
+                bottom: isVerySmallScreen ? 6 : 8,
               ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.timer,
-                  size: isSmallScreen ? 16 : 18,
-                  color: Colors.white,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  option['label'] as String,
-                  style: TextStyle(
-                    fontSize: isSmallScreen ? 12 : 14,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  // Add delay to ensure smooth activation
+                  Future.delayed(const Duration(milliseconds: 100), () {
+                    onStartTimer(option['seconds'] as int);
+                    onPumpCommand(
+                        true); // Send true command when starting timer
+                  });
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.activePumpColor,
+                  padding: EdgeInsets.symmetric(
+                    vertical: isVerySmallScreen
+                        ? 8
+                        : isSmallScreen
+                            ? 10
+                            : 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(isSmallScreen ? 6 : 8),
                   ),
                 ),
-              ],
-            ),
-          ),
-        );
-      }).toList(),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.timer,
+                      size: isVerySmallScreen
+                          ? 14
+                          : isSmallScreen
+                              ? 16
+                              : 18,
+                      color: Colors.white,
+                    ),
+                    SizedBox(width: isVerySmallScreen ? 6 : 8),
+                    Text(
+                      option['label'] as String,
+                      style: TextStyle(
+                        fontSize: isVerySmallScreen
+                            ? 11
+                            : isSmallScreen
+                                ? 12
+                                : 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ),
     );
   }
 }

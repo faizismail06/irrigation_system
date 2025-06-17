@@ -35,41 +35,65 @@ class _HomeScreenState extends State<HomeScreen>
 
   @override
   Widget build(BuildContext context) {
-// Di dalam build method
     final now = DateTime.now();
     final formattedDate = DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(now);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isSmallScreen = screenWidth < 600;
+    final isVerySmallScreen = screenWidth < 400;
 
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
+        titleSpacing: isSmallScreen ? 8 : 16,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Smart Irrigation'),
+            Text(
+              'Smart Irrigation',
+              style: TextStyle(
+                fontSize: isVerySmallScreen
+                    ? 16
+                    : isSmallScreen
+                        ? 18
+                        : 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             Text(
               formattedDate,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: Colors.grey,
-                    fontSize: 12,
+                    fontSize: isVerySmallScreen
+                        ? 10
+                        : isSmallScreen
+                            ? 11
+                            : 12,
                   ),
             ),
           ],
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
+            icon: Icon(
+              Icons.refresh,
+              size: isSmallScreen ? 20 : 24,
+            ),
             onPressed: () {
-              // Add a new test entry to history
               final model =
                   Provider.of<IrrigationModel>(context, listen: false);
               model.addTestHistoryEntry();
 
-              // Show snackbar
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Data diperbarui'),
-                  duration: Duration(seconds: 1),
+                SnackBar(
+                  content: Text(
+                    'Data diperbarui',
+                    style: TextStyle(
+                      fontSize: isSmallScreen ? 12 : 14,
+                    ),
+                  ),
+                  duration: const Duration(seconds: 1),
                 ),
               );
             },
@@ -80,13 +104,34 @@ class _HomeScreenState extends State<HomeScreen>
           labelColor: AppTheme.primaryColor,
           unselectedLabelColor: Colors.grey,
           indicatorColor: AppTheme.primaryColor,
-          tabs: const [
+          labelStyle: TextStyle(
+            fontSize: isVerySmallScreen
+                ? 10
+                : isSmallScreen
+                    ? 11
+                    : 12,
+            fontWeight: FontWeight.w500,
+          ),
+          unselectedLabelStyle: TextStyle(
+            fontSize: isVerySmallScreen
+                ? 10
+                : isSmallScreen
+                    ? 11
+                    : 12,
+          ),
+          tabs: [
             Tab(
-              icon: Icon(Icons.dashboard),
+              icon: Icon(
+                Icons.dashboard,
+                size: isSmallScreen ? 18 : 20,
+              ),
               text: 'Dashboard',
             ),
             Tab(
-              icon: Icon(Icons.history),
+              icon: Icon(
+                Icons.history,
+                size: isSmallScreen ? 18 : 20,
+              ),
               text: 'Riwayat',
             ),
           ],
@@ -95,17 +140,20 @@ class _HomeScreenState extends State<HomeScreen>
       body: Consumer<IrrigationModel>(
         builder: (context, model, child) {
           if (model.isLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return Center(
+              child: SizedBox(
+                width: isSmallScreen ? 30 : 40,
+                height: isSmallScreen ? 30 : 40,
+                child: const CircularProgressIndicator(),
+              ),
+            );
           }
 
           return TabBarView(
             controller: _tabController,
             children: [
-              // Dashboard Tab
-              _buildDashboardTab(model),
-
-              // History Tab
-              _buildHistoryTab(model),
+              _buildDashboardTab(model, isSmallScreen, isVerySmallScreen),
+              _buildHistoryTab(model, isSmallScreen),
             ],
           );
         },
@@ -113,17 +161,29 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  Widget _buildDashboardTab(IrrigationModel model) {
+  Widget _buildDashboardTab(
+      IrrigationModel model, bool isSmallScreen, bool isVerySmallScreen) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final basePadding = isVerySmallScreen
+        ? 8.0
+        : isSmallScreen
+            ? 12.0
+            : 16.0;
+    final cardSpacing = isVerySmallScreen
+        ? 8.0
+        : isSmallScreen
+            ? 12.0
+            : 16.0;
+
     return RefreshIndicator(
       onRefresh: () async {
-        // Add a new test entry to history for testing
         await model.addTestHistoryEntry();
         await Future.delayed(const Duration(seconds: 1));
       },
       color: AppTheme.primaryColor,
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(basePadding),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -137,49 +197,26 @@ class _HomeScreenState extends State<HomeScreen>
               isTimerActive: model.isTimerActive,
             ),
 
-            const SizedBox(height: 16),
+            SizedBox(height: cardSpacing),
 
-            // Moisture status visualization - moved to the top
+            // Moisture status visualization
             MoistureStatusCard(
               moistureValue: model.moistureValue,
               soilStatus: model.soilStatus,
             ),
 
-            const SizedBox(height: 16),
+            SizedBox(height: cardSpacing),
 
-            // Mode switch and pump controls side by side
-            Row(
-              children: [
-                // Mode switch card
-                Expanded(
-                  flex: 1,
-                  child: ModeSwitchCard(
-                    autoMode: model.autoMode,
-                    onToggle: model.toggleAutoMode,
-                  ),
-                ),
-
-                const SizedBox(width: 16),
-
-                // Pump controls card
-                Expanded(
-                  flex: 1,
-                  child: PumpControlCard(
-                    pumpStatus: model.pumpStatus,
-                    autoMode: model.autoMode,
-                    pumpTimer: model.localTimerValue,
-                    isTimerActive: model.isTimerActive,
-                    onToggle: model.togglePump,
-                    onStartTimer: model.startPumpWithTimer,
-                    onCancelTimer: model.cancelPumpTimer,
-                    onPumpCommand: model.sendPumpCommand,
-                    onResetTimer: model.resetPumpTimer,
-                  ),
-                ),
-              ],
+            // Mode switch and pump controls
+            _buildControlsSection(
+              model,
+              screenWidth,
+              isSmallScreen,
+              isVerySmallScreen,
+              cardSpacing,
             ),
 
-            const SizedBox(height: 16),
+            SizedBox(height: cardSpacing),
 
             // Recent history preview
             HistoryCard(
@@ -195,7 +232,68 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  Widget _buildHistoryTab(IrrigationModel model) {
+  Widget _buildControlsSection(
+    IrrigationModel model,
+    double screenWidth,
+    bool isSmallScreen,
+    bool isVerySmallScreen,
+    double spacing,
+  ) {
+    // Stack vertically on very small screens or when width is too constrained
+    if (isVerySmallScreen || screenWidth < 500) {
+      return Column(
+        children: [
+          ModeSwitchCard(
+            autoMode: model.autoMode,
+            onToggle: model.toggleAutoMode,
+          ),
+          SizedBox(height: spacing),
+          PumpControlCard(
+            pumpStatus: model.pumpStatus,
+            autoMode: model.autoMode,
+            pumpTimer: model.localTimerValue,
+            isTimerActive: model.isTimerActive,
+            onToggle: model.togglePump,
+            onStartTimer: model.startPumpWithTimer,
+            onCancelTimer: model.cancelPumpTimer,
+            onPumpCommand: model.sendPumpCommand,
+            onResetTimer: model.resetPumpTimer,
+          ),
+        ],
+      );
+    }
+
+    // Side by side layout for larger screens
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          flex: 1,
+          child: ModeSwitchCard(
+            autoMode: model.autoMode,
+            onToggle: model.toggleAutoMode,
+          ),
+        ),
+        SizedBox(width: spacing),
+        Expanded(
+          flex: 1,
+          child: PumpControlCard(
+            pumpStatus: model.pumpStatus,
+            autoMode: model.autoMode,
+            pumpTimer: model.localTimerValue,
+            isTimerActive: model.isTimerActive,
+            onToggle: model.togglePump,
+            onStartTimer: model.startPumpWithTimer,
+            onCancelTimer: model.cancelPumpTimer,
+            onPumpCommand: model.sendPumpCommand,
+            onResetTimer: model.resetPumpTimer,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHistoryTab(IrrigationModel model, bool isSmallScreen) {
     return HistoryCard(
       moistureHistory: model.moistureHistory,
       showViewAll: false,

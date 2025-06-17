@@ -528,23 +528,36 @@ class HistoryCard extends StatelessWidget {
             interval: 1,
           ),
         ),
+        // Ganti bagian leftTitles dalam method _buildLineChartData
         leftTitles: AxisTitles(
           sideTitles: SideTitles(
             showTitles: true,
             reservedSize: 40,
             getTitlesWidget: (value, meta) {
-              return Padding(
-                padding: const EdgeInsets.only(right: 8.0),
-                child: Text(
-                  value.toInt().toString(),
-                  style: TextStyle(
-                    color: Colors.grey.shade500,
-                    fontSize: 10,
+              // Tentukan nilai-nilai yang ingin ditampilkan
+              List<double> allowedValues = [0, 1024, 2048, 3072, 4095];
+
+              // Cari nilai terdekat dalam allowedValues
+              double closestValue = allowedValues.reduce(
+                  (a, b) => (a - value).abs() < (b - value).abs() ? a : b);
+
+              // Jika nilai sangat dekat (toleransi 50), tampilkan
+              if ((value - closestValue).abs() < 50) {
+                return Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: Text(
+                    closestValue.toInt().toString(),
+                    style: TextStyle(
+                      color: Colors.grey.shade500,
+                      fontSize: 10,
+                    ),
                   ),
-                ),
-              );
+                );
+              }
+              return const SizedBox(); // Tidak menampilkan label jika terlalu jauh
             },
-            interval: 1000,
+            interval:
+                1024, // Set interval ke 1024 agar sesuai dengan pembagian yang diinginkan
           ),
         ),
         rightTitles: const AxisTitles(
